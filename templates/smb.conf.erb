@@ -1,0 +1,152 @@
+# ************************************
+# Managed by Puppet
+# ************************************
+
+[global]
+# ----------------------- Network-Related Options -------------------------
+#
+<% if scope['samba::server::workgroup'] -%>
+	workgroup = <%= scope['samba::server::workgroup'] %>
+<% end -%>
+<% if scope['samba::server::server_string'] -%>
+        server string = <%= scope['samba::server::server_string'] %>
+<% end -%>
+<% if scope['samba::server::netbios_name'] -%>
+        netbios name = <%= scope['samba::server::netbios_name'] %>
+<% end -%>
+<% unless scope['samba::server::interfaces'].empty? -%>
+        interfaces = <%= scope['samba::server::interfaces'].join(' ') %>
+<% end -%>
+<% unless scope['samba::server::hosts_allow'].empty? -%>
+        hosts allow = <%= scope['samba::server::hosts_allow'].join(' ') %>
+<% end -%>
+
+# --------------------------- Logging Options -----------------------------
+#
+        log file = /var/log/samba/log.%m
+        max log size = 50
+        #log level = 3 passdb:5 auth:10 winbind:2
+
+# ----------------------- Security & Domain Members Options ---------------
+#
+        security = <%= scope['samba::server::security'] %>
+;       passdb backend = tdbsam
+<% if scope['samba::server::realm'] -%>
+        realm = <%= scope['samba::server::realm'] %>
+<% end -%>
+<% if scope['samba::server::security'] == 'ads' or scope['samba::server::security'] == 'domain' -%>
+<% if ! scope['samba::server::password_server'].empty? -%>
+        password server = <%= scope['samba::server::password_server'].join(' ') %>
+<% else -%>
+        password server = '*'
+<% end -%>
+<% end -%>
+
+<% if scope['samba::server::security'] == 'ads' -%>
+# ----------------------- Active Directory Options ---------------------------
+#
+        winbind separator = <%= scope['samba::server::winbind_separator'] %>
+<% if scope['samba::server::winbind_enum_users'] -%>
+        winbind enum users = yes
+<% end -%>
+<% if scope['samba::server::winbind_enum_groups'] -%>
+        winbind enum groups = yes
+<% end -%>
+        winbind use default domain = yes
+        winbind refresh tickets = yes
+        
+        idmap config * : backend = tdb
+        idmap config * : range = 10000 - 20000
+
+        map untrusted to domain = Yes
+
+<% if scope['samba::server::homes'] -%>
+        template shell = /bin/bash
+        template homedir = <%= scope['samba::server::homes_root'] %>/%U
+<% end -%>
+
+<% end -%>
+# ----------------------- Browser Control Options ----------------------------
+#
+<% if scope['samba::server::master_browser'] -%>
+        local master = yes
+        os level = 65
+        preferred master = yes
+<% else -%>
+        local master = no
+        os level = 33
+        preferred master = no
+<% end -%>
+
+#----------------------------- Name Resolution -------------------------------
+#
+<% if scope['samba::server::wins_support'] -%>
+        wins support = yes
+<% end -%>
+<% if scope['samba::server::wins_server'] -%>
+        wins server = <%= scope['samba::server::wins_server'] %>
+<% end -%>
+<% if scope['samba::server::wins_proxy'] -%>
+        wins proxy = yes
+<% end -%>
+<% if scope['samba::server::dns_proxy'] -%>
+        dns proxy = yes
+<% else -%>
+        dns proxy = no
+<% end -%>
+
+# --------------------------- Printing Options ----------------------------
+#
+<% if scope['samba::server::printing'] -%>
+	printing = cups
+	printcap name = cups
+	load printers = yes
+	cups options = raw
+<% else -%>
+        load printers = no
+        disable spoolss = Yes
+        show add printer wizard = No
+        printcap name = /etc/printcap
+<% end -%>
+
+# --------------------------- File System Options ---------------------------
+#
+        map archive = no
+        map hidden = no
+        map read only = no
+        map system = no
+
+        store dos attributes = yes
+        unix extensions = no
+
+        veto files = /lost?found/
+
+# --------------------------- Charset Options -------------------------------
+#
+        dos charset = <%= scope['samba::server::dos_charset'] %>
+        unix charset = <%= scope['samba::server::unix_charset'] %>
+<% if scope['samba::server::display_charset'] -%>
+        display charset = <%= scope['samba::server::display_charset'] %>
+<% end -%>
+        case sensitive = no
+        default case = lower
+        preserve case = yes
+
+# --------------------------- Misc Options ----------------------------------
+#
+;       socket options = TCP_NODELAY IPTOS_LOWDELAY SO_SNDBUF=8192 SO_RCVBUF=8192
+        obey pam restrictions = yes
+
+<% if scope['samba::server::homes'] -%>
+# --------------------------- Home Directories ------------------------------
+#
+[homes]
+        comment = Home Directories
+        valid users = <% if scope['samba::server::security'] == 'ads' %>%D+<% end %>%S
+        read only = No
+        create mask = 0600
+        directory mask = 0700
+        browseable = No
+<% end -%>
+# --------------------------- Other shares ----------------------------------
+#

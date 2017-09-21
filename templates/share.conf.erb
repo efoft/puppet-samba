@@ -1,0 +1,25 @@
+[<%= @title %>]
+        path = <%= @path %>
+<% if ! @visible -%>
+        browseable = No
+<% end -%>
+<% if ! @keep_owner -%>
+        force user = <%= scope['samba::server::share_owner'] %>
+<% end -%>
+        force group = <%= scope['samba::server::share_group'] %>
+        create mask = 0600
+        directory mask = 0700
+<% if ! @valid_users.empty? -%>
+        valid users = <%= @valid_users.join(',') %>
+<% end -%>
+<% if @write_list.empty? -%>
+        writeable = yes
+<% else -%>
+        write list = <%= @write_list.join(',') %>
+<% end -%>
+<% if @ad_locks -%>
+        blocking locks = No
+        csc policy = disable
+        fake oplocks = Yes
+<% end -%>
+
