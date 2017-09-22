@@ -10,6 +10,14 @@ class samba::server::config {
     content => template('samba/smb.conf.erb'),
     order   => '01',
   }
+
+  if $samba::server::homes {
+    concat::fragment { 'smb.conf-homes':
+      target  => $samba::params::server_config_file,
+      content => template('samba/homes.erb'),
+      order   => '03',
+    }
+  }
     
   # users and groups
   # all content inside shares belong to group smbgrp

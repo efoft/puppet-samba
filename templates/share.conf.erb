@@ -17,6 +17,7 @@
 <% else -%>
         write list = <%= @write_list.join(',') %>
 <% end -%>
+        public = <%= @_public %>
 <% if @ad_locks -%>
         blocking locks = No
         csc policy = disable

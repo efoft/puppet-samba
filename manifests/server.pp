@@ -8,7 +8,7 @@ class samba::server (
   $hosts_allow     = [],
   $security        = 'user',
   $realm           = undef,
-  $password_server = [],
+  $password_server = undef,
   $master_browser  = false,
   $printing        = false,
   $wins_support    = false,
@@ -31,7 +31,7 @@ class samba::server (
 
   # Input validation
   validate_re($ensure, ['present','absent'], "${ensure} is not valid for ensure, expected 'present' or 'absent'")
-  validate_re($security, ['user','domain','ads'], "${security} is not valid for security, expected 'user','domain' or 'ads'")
+  validate_re($security, ['user','domain','ads','share'], "${security} is not valid for security, expected 'user','share','domain' or 'ads'")
   validate_array($interfaces, $hosts_allow)
   validate_bool($printing, $master_browser, $wins_support, $wins_proxy, $dns_proxy, $winbind_enum_users, $winbind_enum_groups, $homes)
 
@@ -41,6 +41,10 @@ class samba::server (
 
   if $homes and ! $home_root {
     fail('Parameter home_root is required if homes = true')
+  }
+
+  if versioncmp($facts['samba_version'], '4.0.0') and $security == 'share' {
+    fail("Security type 'share' is not supported in Samba 4, use one of 'user', 'domain' or 'ads'.")
   }
   # End of input validation
 

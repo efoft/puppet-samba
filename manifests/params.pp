@@ -3,9 +3,11 @@ class samba::params {
 
   case $::osfamily {
     'redhat': {
-      $server_package_name = 'samba'
-      $server_config_file  = '/etc/samba/smb.conf'
-      $server_service_name = 'smb'
+      $server_package_name  = 'samba'
+      $server_config_file   = '/etc/samba/smb.conf'
+      $server_service_name  = 'smb'
+      $winbind_package_name = ['samba-winbind','samba-winbind-clients']
+      $winbind_service_name = 'winbind'
     }
     default: {
       fail('Sorry! Your OS is not supported.')

@@ -15,7 +15,8 @@
         netbios name = <%= scope['samba::server::netbios_name'] %>
 <% end -%>
 <% unless scope['samba::server::interfaces'].empty? -%>
-        interfaces = <%= scope['samba::server::interfaces'].join(' ') %>
+        interfaces = lo <%= scope['samba::server::interfaces'].join(' ') %>
+        bind interfaces only = yes
 <% end -%>
 <% unless scope['samba::server::hosts_allow'].empty? -%>
         hosts allow = <%= scope['samba::server::hosts_allow'].join(' ') %>
@@ -32,11 +33,11 @@
         security = <%= scope['samba::server::security'] %>
 ;       passdb backend = tdbsam
 <% if scope['samba::server::realm'] -%>
-        realm = <%= scope['samba::server::realm'] %>
+        realm = <%= scope['samba::server::realm'].upcase %>
 <% end -%>
 <% if scope['samba::server::security'] == 'ads' or scope['samba::server::security'] == 'domain' -%>
-<% if ! scope['samba::server::password_server'].empty? -%>
-        password server = <%= scope['samba::server::password_server'].join(' ') %>
+<% if scope['samba::server::password_server'] -%>
+        password server = <%= scope['samba::server::password_server'] %>
 <% else -%>
         password server = '*'
 <% end -%>
@@ -62,7 +63,7 @@
 
 <% if scope['samba::server::homes'] -%>
         template shell = /bin/bash
-        template homedir = <%= scope['samba::server::homes_root'] %>/%U
+        template homedir = <%= scope['samba::server::home_root'] %>/%U
 <% end -%>
 
 <% end -%>
@@ -136,17 +137,3 @@
 #
 ;       socket options = TCP_NODELAY IPTOS_LOWDELAY SO_SNDBUF=8192 SO_RCVBUF=8192
         obey pam restrictions = yes
-
-<% if scope['samba::server::homes'] -%>
-# --------------------------- Home Directories ------------------------------
-#
-[homes]
-        comment = Home Directories
-        valid users = <% if scope['samba::server::security'] == 'ads' %>%D+<% end %>%S
-        read only = No
-        create mask = 0600
-        directory mask = 0700
-        browseable = No
-<% end -%>
-# --------------------------- Other shares ----------------------------------
-#

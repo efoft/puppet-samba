@@ -1,0 +1,11 @@
+
+# --------------------------- Home Directories ------------------------------
+#
+[homes]
+        comment = Home Directories
+        valid users = <% if scope['samba::server::security'] == 'ads' %>%D+<% end %>%S
+        read only = No
+        create mask = 0600
+        directory mask = 0700
+        browseable = No
+
