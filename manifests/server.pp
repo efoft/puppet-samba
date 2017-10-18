@@ -1,40 +1,58 @@
+# === Class samba::server ===
+#
+# === Parameters ===
+# Almost all params are described in man smb.conf
+# Below are only module specific ones.
+#
+# [*homes*]
+#   Whether to include [homes] into config.
+#
+# [*home_root*]
+#   Directory under which AD users homes are made via pam.
+#
+# [*share_owner*]
+#   User that owns shares with keep_owner = false
+#
+# [*share_uid*]
+#   *share_owner* uid.
+#
+# [*share_group*]
+#   Group that owns shares with keep_owner = false
+#
+# [*share_gid*]
+#   *share_group* gid.
 #
 class samba::server (
-  $ensure          = 'present',
-  $workgroup       = undef,
-  $server_string   = undef,
-  $netbios_name    = undef,
-  $interfaces      = [],
-  $hosts_allow     = [],
-  $security        = 'user',
-  $realm           = undef,
-  $password_server = undef,
-  $master_browser  = false,
-  $printing        = false,
-  $wins_support    = false,
-  $wins_server     = undef,
-  $wins_proxy      = false,
-  $dns_proxy       = false,
-  $winbind_separator = '+',
-  $winbind_enum_users = true,
-  $winbind_enum_groups = true,
-  $dos_charset         = $samba::params::dos_charset,
-  $unix_charset        = $samba::params::unix_charset,
-  $display_charset     = $samba::params::display_charset,
-  $homes               = false,
-  $home_root           = undef,
-  $share_owner         = $samba::params::share_owner,
-  $share_uid           = $samba::params::share_uid,
-  $share_group         = $samba::params::share_group,
-  $share_gid           = $samba::params::share_gid,
+  Enum['present','absent'] $ensure              = 'present',
+  Optional[String] $workgroup                   = undef,
+  Optional[String] $server_string               = undef,
+  Optional[String] $netbios_name                = undef,
+  Array[String] $interfaces                     = [],
+  Array[String] $hosts_allow                    = [],
+  Enum['share','user','ads','domain'] $security = 'user',
+  Optional[String] $realm                       = undef,
+  Optional[String] $password_server             = undef,
+  Boolean $master_browser                       = false,
+  Boolean $printing                             = false,
+  Boolean $wins_support                         = false,
+  Optional[String] $wins_server                 = undef,
+  Boolean $wins_proxy                           = false,
+  Boolean $dns_proxy                            = false,
+  String $winbind_separator                     = '+',
+  Boolean $winbind_enum_users                   = true,
+  Boolean $winbind_enum_groups                  = true,
+  Optional[String] $dos_charset                 = $samba::params::dos_charset,
+  Optional[String] $unix_charset                = $samba::params::unix_charset,
+  Optional[String] $display_charset             = $samba::params::display_charset,
+  Boolean $homes                                = false,
+  Optional[Stdlib::Unixpath] $home_root         = undef,
+  String $share_owner                           = $samba::params::share_owner,
+  Numeric $share_uid                            = $samba::params::share_uid,
+  String $share_group                           = $samba::params::share_group,
+  Numeric $share_gid                            = $samba::params::share_gid,
 ) inherits samba::params {
 
   # Input validation
-  validate_re($ensure, ['present','absent'], "${ensure} is not valid for ensure, expected 'present' or 'absent'")
-  validate_re($security, ['user','domain','ads','share'], "${security} is not valid for security, expected 'user','share','domain' or 'ads'")
-  validate_array($interfaces, $hosts_allow)
-  validate_bool($printing, $master_browser, $wins_support, $wins_proxy, $dns_proxy, $winbind_enum_users, $winbind_enum_groups, $homes)
-
   if $security == 'ads' and ! $realm {
     fail('Parameter realm is required for security = ads')
   }

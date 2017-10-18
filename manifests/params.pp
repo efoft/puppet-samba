@@ -26,6 +26,6 @@ class samba::params {
 
   $share_owner = 'smbuser'
   $share_group = 'smbgrp'
-  $share_uid   = '5010'
-  $share_gid   = '5010'
+  $share_uid   = 5010
+  $share_gid   = 5010
 }
