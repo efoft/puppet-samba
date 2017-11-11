@@ -43,6 +43,14 @@
 <% end -%>
 <% end -%>
 
+<% if scope['samba::server::clustering'] -%>
+# ----------------------- Clustering Options ---------------------------
+#
+        clustering = yes
+        idmap backend = tdb2
+        strict locking = no
+
+<% end -%>
 <% if scope['samba::server::security'] == 'ads' -%>
 # ----------------------- Active Directory Options ---------------------------
 #
@@ -137,3 +145,6 @@
 #
 ;       socket options = TCP_NODELAY IPTOS_LOWDELAY SO_SNDBUF=8192 SO_RCVBUF=8192
         obey pam restrictions = yes
+<% if scope['samba::server::private_dir'] -%>
+        private dir = <%= scope['samba::server::private_dir'] %>
+<% end -%>

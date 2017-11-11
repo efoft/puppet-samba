@@ -3,6 +3,14 @@
 # === Parameters ===
 # Almost all params are described in man smb.conf
 # Below are only module specific ones.
+# [*clustering*]
+#   Flag saying if samba is managed by cluster software (like ctdb).
+#   Default: false
+#
+# [*private_dir*]
+#   Directory smbd will use for storing such files as smbpasswd and secrets.tdb.
+#   Parameters becomes required in case of *clustering* when it must point to a shared directory.
+#   Default: undef = smbd will use its own default.
 #
 # [*homes*]
 #   Whether to include [homes] into config.
@@ -22,11 +30,22 @@
 # [*share_gid*]
 #   *share_group* gid.
 #
+# [*service_manage*]
+#   If set to true, will bring smbd (and optionally winbind if ads) to running state.
+#   If false don't manage the state of these services. This might be required if samba
+#   is under cluster control.
+#
+# [*service_enable*]
+#   Whether to enable or disable smbd (and optionally winbind if ads) services.
+#   Might be required to set to false in case of clustering samba.
+#
 class samba::server (
   Enum['present','absent'] $ensure              = 'present',
   Optional[String] $workgroup                   = undef,
   Optional[String] $server_string               = undef,
   Optional[String] $netbios_name                = undef,
+  Boolean $clustering                           = false,
+  Optional[Stdlib::Unixpath] $private_dir       = undef,
   Array[String] $interfaces                     = [],
   Array[String] $hosts_allow                    = [],
   Enum['share','user','ads','domain'] $security = 'user',
@@ -50,6 +69,8 @@ class samba::server (
   Numeric $share_uid                            = $samba::params::share_uid,
   String $share_group                           = $samba::params::share_group,
   Numeric $share_gid                            = $samba::params::share_gid,
+  Boolean $service_manage                       = true,
+  Boolean $service_enable                       = true,
 ) inherits samba::params {
 
   # Input validation
