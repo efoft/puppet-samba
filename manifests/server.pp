@@ -3,6 +3,9 @@
 # === Parameters ===
 # Almost all params are described in man smb.conf
 # Below are only module specific ones.
+# [*interfaces*]
+#   If this parameter is not empty, samba's bind interfaces only directive is applied.
+#
 # [*clustering*]
 #   Flag saying if samba is managed by cluster software (like ctdb).
 #   Default: false
