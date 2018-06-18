@@ -43,18 +43,18 @@ define samba::share(
 
   if $_public == 'yes' {
     $public_opts = {
-      'target'  => $samba::server::server_config_file,
+      'target'  => $samba::params::server_config_file,
       'content' => template('samba/map_to_guest.erb'),
-      'notify'  => Service[$samba::server::service_name],
+      'notify'  => Service[$samba::params::server_service_name],
       'order'   => '02',
     }
     ensure_resource('concat::fragment', 'smb.conf-map-to-guest', $public_opts)
   }
 
   concat::fragment { "share-${title}-config":
-    target  => $samba::server::server_config_file,
+    target  => $samba::params::server_config_file,
     content => template('samba/share.conf.erb'),
-    notify  => Service[$samba::server::service_name],
+    notify  => Service[$samba::params::server_service_name],
     order   => '04',
   }
 
