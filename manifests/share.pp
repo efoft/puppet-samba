@@ -59,12 +59,6 @@ define samba::share(
   }
 
   if $manage_dir {
-    selinux::fcontext { "samba-fcontext-for-${path}":
-      path    => $path,
-      context => 'samba_share_t',
-      before  => Exec["create-directory-tree-${path}"],
-    }
-
     exec { "create-directory-tree-${path}":
       command => "mkdir -p ${path}",
       path    => ['/usr/bin','/bin'],
